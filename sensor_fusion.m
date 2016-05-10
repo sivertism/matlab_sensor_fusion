@@ -2,9 +2,9 @@
 clear;
 clc;
 close all;
-%load('P_I_D_reg_depth_15N.mat');
-%load('testrun1.mat');
-load('plattform1_roll.mat');
+%load('P_I_D_reg_depth.mat');
+load('regfull1.mat');
+%load('plattform3_hivroll.mat');
 
 %% Filter fusion gyro and accelerometer
 % Initialize vectors
@@ -74,9 +74,9 @@ for i=1:dataset_length
    weight_acc(i) = 1/(abs_diff + 1);
    
    if(th_abs_k < 0.25)
-       %weight_acc(i) = weight_acc(i) - 3*th_abs_k;
+       weight_acc(i) = weight_acc(i) - 3*th_abs_k;
    else 
-       %weight_acc(i) = weight_acc(i) - 0.75;
+       weight_acc(i) = weight_acc(i) - 0.75;
    end
    delta_pitch_k = pitch_k - pitch_k_1;
    delta_roll_k = roll_k - roll_k_1;
@@ -98,15 +98,17 @@ for i=1:dataset_length
    % ----------------------------------------------------------------------
    % GYROSCOPE
    % ----------------------------------------------------------------------
-   % ROV
-%    gx_k = gx(i)/100;
-%    gy_k = gy(i)/100;
-%    gz_k = gz(i)/100;
-   
+   % Convet to degrees per second
+%    gx_k = gx(i)*1000/(2^15-1);
+%    gy_k = gy(i)*1000/(2^15-1);
+%    gz_k = gz(i)*1000/(2^15-1);
+   gx_k = gx(i)*0.00875;
+   gy_k = gy(i)*0.00875;
+   gz_k = gz(i)*0.00875;
    % Platform:
-   gx_k = gx(i)/0.30517;
-   gy_k = gy(i)/0.30517;
-   gz_k = gz(i)/0.30517;
+%    gx_k = gx(i)/0.30517;
+%    gy_k = gy(i)/0.30517;
+%    gz_k = gz(i)/0.30517;
    
    % Calculate delta_pitch, delta_roll, delta_yaw
    delta_pitch_gyro(i) = timestep*gy_k;
@@ -114,12 +116,17 @@ for i=1:dataset_length
    delta_yaw_gyro(i) = timestep*gz_k;
    
    % Calculate gyroscope weights
-   weight_gyro_pitch(i) = abs(gy_k/5);
-   weight_gyro_roll(i) = abs(gx_k/5);
-   weight_gyro_yaw(i) = abs(gz_k/5);
+   gain_pitch = 1/4;
+   gain_roll = 1/9;
+   weight_gyro_pitch(i) = abs(gain_pitch*gy_k);
+   weight_gyro_roll(i) = abs(gain_roll*gx_k);
+   weight_gyro_yaw(i) = abs(sqrt(gz_k)/4);
    
-   weight_gyro_pitch(i) = weight_gyro_pitch(i)*2;
-   weight_gyro_roll(i) = weight_gyro_roll(i)*2;
+   if(weight_gyro_pitch(i)>1); weight_gyro_pitch(i) = 1; end;
+   if(weight_gyro_roll(i)>1); weight_gyro_roll(i) = 1; end;
+   
+   weight_gyro_pitch(i) = weight_gyro_pitch(i)*1;
+   weight_gyro_roll(i) = weight_gyro_roll(i)*1;
    
    % ----------------------------------------------------------------------
    % FUSION
@@ -152,20 +159,23 @@ pitch_fus_plot = est_pitch;
 roll_fus_plot = est_roll;
 time = 0:timestep:(timestep*dataset_length - timestep);
 
+% Sine wave for Stewart platform test
+% sine_wave = 20*sin(0.25*2*pi*time-10.4);
+
 subplot(3,1,1);
-plot(time, roll_acc_plot);hold on; plot(time, roll_fus_plot,'LineWidth', 1.5);
-legend('Accelerometer pitch' ,'Fusion pitch');
+plot(time, pitch_acc_plot);hold on; plot(time, pitch_fus_plot,'LineWidth', 1.5);
+legend('Akselerometer stamp' ,'Filtrert stamp');
 xlabel('Tid [x100 ms]'); ylabel('Vinkel [grader]');
 
 subplot(3,1,2);
-% Roll
+% % Roll
 % plot(time, roll_acc_plot); hold on; plot(time, roll_fus_plot, 'LineWidth', 1.5);
-% legend('Accelerometer roll' ,'Fusion roll');
+% legend('Akselerometer rull' ,'Filtrert rull');
 % xlabel('Tid [x100 ms]'); ylabel('Vinkel [grader]');
 
-% Weights
+% % Weights
 plot(time, weight_acc_roll, time, weight_gyro_roll, 'LineWidth', 1);
-legend('Weight acc pitch', 'Weight gyro pitch'); xlabel('Tid [x100 ms]');
+legend('Vekt akselerometer', 'Vekt gyroskop'); xlabel('Tid [x100 ms]');
 
 subplot(3,1,3);
 % Thrusters
