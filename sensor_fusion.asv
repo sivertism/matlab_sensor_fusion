@@ -2,7 +2,8 @@
 clear;
 clc;
 close all;
-load('testrun7.mat');
+%load('regdybde3.mat');
+load('testrun1.mat');
 
 %% Filter fusion gyro and accelerometer
 % Initialize vectors
@@ -28,7 +29,8 @@ pitch_k_1 = 0;
 roll_k_1 = 0;
 timestep = 0.1; % 10 Hz sampling frequency.
 
-for i=1:length(ax)
+for i=1:dataset_length
+    
    % ----------------------------------------------------------------------
    % ACCELEROMETER
    % ----------------------------------------------------------------------
@@ -62,7 +64,19 @@ for i=1:length(ax)
    
    % Calculate accelerometer weight
    abs_diff = abs(abs_k - 1);
+   
+   % Thruster compensation
+   th_abs_k = sqrt(th1(i)^2 + th2(i)^2 + th3(i)^2 + th4(i)^2 + th5(i)^2 + th6(i)^2 ...
+    + th7(i)^2 + th8(i)^2);
+   th_abs_k = th_abs_k/200;
+   
    weight_acc(i) = 1/(abs_diff + 1);
+   
+   if(th_abs_k < 0.25)
+       weight_acc(i) = weight_acc(i) - 3*th_abs_k;
+   else 
+       weight_acc(i) = weight_acc(i) - 0.75;
+   end
    delta_pitch_k = pitch_k - pitch_k_1;
    delta_roll_k = roll_k - roll_k_1;
    pitch_k_1 = pitch_k;
@@ -79,12 +93,6 @@ for i=1:length(ax)
        weight_acc_roll(i) = weight_acc(i);
    end
    
-   % Special case if roll or pitch > 90 deg
-   if (est_pitch(i) >= 90)
-       weight_acc_pitch = 0;
-   else if (est_pitch(i) <= 90)
-           weight_acc_pitch  = 0;
-           
    
    % ----------------------------------------------------------------------
    % GYROSCOPE
@@ -137,14 +145,31 @@ pitch_fus_plot = est_pitch;
 roll_fus_plot = est_roll;
 time = 0:timestep:(timestep*dataset_length - timestep);
 
-subplot(2,1,1);
-plot(time, pitch_fus_plot,'LineWidth', 1);hold on; plot(time, pitch_acc_plot);
-legend('Fusion pitch', 'Accelerometer pitch');
+subplot(3,1,1);
+plot(time, pitch_acc_plot);hold on; plot(time, pitch_fus_plot,'LineWidth', 1.5);
+legend('Accelerometer pitch' ,'Fusion pitch');
 xlabel('Tid [x100 ms]'); ylabel('Vinkel [grader]');
 
-subplot(2,1,2); 
-plot(time, roll_fus_plot, time, roll_acc_plot, 'LineWidth', 1);
-legend('Fusion roll', 'Accelerometer roll');
-xlabel('Tid [x100 ms]'); ylabel('Vinkel [grader]');
-% plot(time, weight_acc_pitch, time, weight_gyro_pitch, 'LineWidth', 1);
-% legend('Weight acc pitch', 'Weight gyro pitch'); xlabel('Tid [x100 ms]');
+subplot(3,1,2);
+% Roll
+% plot(time, roll_acc_plot); hold on; plot(time, roll_fus_plot, 'LineWidth', 1.5);
+% legend('Accelerometer roll' ,'Fusion roll');
+% xlabel('Tid [x100 ms]'); ylabel('Vinkel [grader]');
+
+% Weights
+plot(time, weight_acc_pitch.*10, time, weight_gyro_pitch, 'LineWidth', 1);
+legend('Weight acc pitch', 'Weight gyro pitch'); xlabel('Tid [x100 ms]');
+
+subplot(3,1,3);
+% Thrusters
+th_abs = sqrt(th1.^2 + th2.^2 + th3.^2 + th4.^2 + th5.^2 + th6.^2 ...
+    + th7.^2 + th8.^2);
+th_abs = th_abs./200;
+plot(time, th_abs, 'LineWidth', 1.5);
+legend('Absolutt thrusterpådrag');
+xlabel('Tid [x100 ms]');
+
+foer = std(pitch(1620:1670))/10;
+etter = std(est_pitch(1180:1340));
+fprintf('Standardavvik før var: %.3f \nStandardavvik etter var: %.3f \nDifferansen var: %.3f%%', ...
+    foer, etter, (foer-etter)*100/foer);
