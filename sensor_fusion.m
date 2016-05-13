@@ -3,7 +3,7 @@ clear;
 clc;
 close all;
 %load('P_I_D_reg_depth.mat');
-load('regfull1.mat');
+load('testrun4.mat');
 %load('plattform3_hivroll.mat');
 
 %% Filter fusion gyro and accelerometer
@@ -67,11 +67,21 @@ for i=1:dataset_length
    abs_diff = abs(abs_k - 1);
    
    % Thruster compensation
-   th_abs_k = sqrt(th1(i)^2 + th2(i)^2 + th3(i)^2 + th4(i)^2 + th5(i)^2 + th6(i)^2 ...
-    + th7(i)^2 + th8(i)^2);
-   th_abs_k = th_abs_k/200;
-   
-   weight_acc(i) = 1/(abs_diff + 1);
+   th1(i) = th1(i)*3;
+   th2(i) = th2(i)*3;
+   th3(i) = th3(i)*3;
+   th4(i) = th4(i)*3;
+   th5(i) = th5(i)*3;
+   th6(i) = th6(i)*3;
+   th7(i) = th7(i)*3;
+   th8(i) = th8(i)*3;
+   %th_abs_k = sqrt(th1(i)^2 + th2(i)^2 + th3(i)^2 + th4(i)^2 + th5(i)^2 + th6(i)^2 ...
+   % + th7(i)^2 + th8(i)^2);
+   %th_abs_k = th_abs_k/200;
+   th_abs_k = abs(th1(i)) + abs(th2(i)) + abs(th3(i)) + abs(th4(i)) + ...
+       abs(th5(i)) + abs(th6(i)) + abs(th7(i)) + abs(th8(i));
+   th_abs_k = th_abs_k/800;
+   weight_acc(i) = 1;%/(abs_diff + 1);
    
    if(th_abs_k < 0.25)
        weight_acc(i) = weight_acc(i) - 3*th_abs_k;
@@ -162,22 +172,24 @@ time = 0:timestep:(timestep*dataset_length - timestep);
 % Sine wave for Stewart platform test
 % sine_wave = 20*sin(0.25*2*pi*time-10.4);
 
-subplot(3,1,1);
-plot(time, pitch_acc_plot);hold on; plot(time, pitch_fus_plot,'LineWidth', 1.5);
+subplot(2,1,1);
+plot(time, pitch_acc_plot);hold on; plot(time, pitch_fus_plot,'LineWidth', 1);
 legend('Akselerometer stamp' ,'Filtrert stamp');
 xlabel('Tid [x100 ms]'); ylabel('Vinkel [grader]');
+%axis([50 60 -8 8]);
 
-subplot(3,1,2);
+subplot(2,1,2);
 % % Roll
-% plot(time, roll_acc_plot); hold on; plot(time, roll_fus_plot, 'LineWidth', 1.5);
+% plot(time, roll_acc_plot); hold on; plot(time, roll_fus_plot, 'LineWidth', 1);
 % legend('Akselerometer rull' ,'Filtrert rull');
 % xlabel('Tid [x100 ms]'); ylabel('Vinkel [grader]');
+% axis([20 50 -30 10]);
+% Weights
+% plot(time, weight_acc_roll, time, weight_gyro_roll, 'LineWidth', 1);
+% legend('Vekt akselerometer', 'Vekt gyroskop'); xlabel('Tid [x100 ms]');
+%axis([30 40 -0.2 1.2]);
 
-% % Weights
-plot(time, weight_acc_roll, time, weight_gyro_roll, 'LineWidth', 1);
-legend('Vekt akselerometer', 'Vekt gyroskop'); xlabel('Tid [x100 ms]');
-
-subplot(3,1,3);
+%subplot(3,1,3);
 % Thrusters
 th_abs = sqrt(th1.^2 + th2.^2 + th3.^2 + th4.^2 + th5.^2 + th6.^2 ...
     + th7.^2 + th8.^2);
@@ -185,8 +197,10 @@ th_abs = th_abs./200;
 plot(time, th_abs, 'LineWidth', 1.5);
 legend('Absolutt thrusterpådrag');
 xlabel('Tid [x100 ms]');
+%axis([50 60 0.08 0.09]);
 
-foer = std(pitch(200:1200))/10;
-etter = std(est_pitch(200:1200));
-fprintf('Standardavvik før var: %.3f \nStandardavvik etter var: %.3f \nDifferansen var: %.3f%%', ...
-    foer, etter, (foer-etter)*100/foer);
+
+% foer = std(pitch(200:1200))/10;
+% etter = std(est_pitch(200:1200));
+% fprintf('Standardavvik før var: %.3f \nStandardavvik etter var: %.3f \nDifferansen var: %.3f%%', ...
+%     foer, etter, (foer-etter)*100/foer);

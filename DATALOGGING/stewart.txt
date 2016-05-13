@@ -1,0 +1,13 @@
+HIV
+25 cm totalt område
+0.25 Hz
+
+RULL 
+\pm 20 grader.
+0.25 Hz
+
+HIV + RULL
+\pm 20 grader
+12.5 cm totalt område, 6.25 amplitude
+
+6DOF Parallell manipulator med hiv- og rullkompenserende krane.
