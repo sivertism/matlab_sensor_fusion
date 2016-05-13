@@ -1,0 +1,18 @@
+Navn						Dybde				Rotasjon
+
+test2_28_reg - uten filtrering		Kp 18	Td 10	Ti 10		Kp 1.5	Td 0	Ti 3
+test2_29_reg - med LP filtrering	Kp 18	Td 10	Ti 10		Kp 1.5	Td 0	Ti 3
+test2_30_reg - med LP filtrering	Kp 18	Td 60	Ti 10		Kp 1.5	Td 0	Ti 3 
+test2_31_reg - 				Kp 18	Td 0	Ti 10		Kp 1.5	Td 0	Ti 3 
+test2_32_reg - 				Kp 18	Td 0	Ti 10		Kp 1.5	Td 0	Ti 3 
+test2_33_reg - 	PI sprang		Kp 18	Td 0	Ti 10		Kp 1.5	Td 0	Ti 3 	Setpunkt dybde 1138
+test2_34_reg - 	PID sprang		Kp 18	Td 5	Ti 10		Kp 1.5	Td 0	Ti 3 	Setpunkt dybde 1399
+test2_35_reg - 	PID sprang		Kp 18	Td 5	Ti 10		Kp 1.5	Td 1	Ti 3 	Setpunkt dybde 924
+
+
+
+test2_36_reg - 	PID sprang		Kp 18	Td 5	Ti 10		Kp 1.5	Td 0	Ti 3 	Setpunkt dybde 1399
+
+
+
+test2_37_reg - 	PID sprang		Kp 18	Td 5	Ti 10		Kp 1.5	Td 0	Ti 3 	Setpunkt dybde 1399
