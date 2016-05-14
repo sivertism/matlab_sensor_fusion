@@ -140,9 +140,6 @@ for i=1:dataset_length
    if(weight_gyro_pitch(i)>1); weight_gyro_pitch(i) = 1; end;
    if(weight_gyro_roll(i)>1); weight_gyro_roll(i) = 1; end;
    
-   weight_gyro_pitch(i) = weight_gyro_pitch(i)*1;
-   weight_gyro_roll(i) = weight_gyro_roll(i)*1;
-   
    % ----------------------------------------------------------------------
    % FUSION
    % ----------------------------------------------------------------------
