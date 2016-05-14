@@ -2,8 +2,8 @@
 clear;
 clc;
 close all;
-load('P_I_regdepth_PR.mat');
-%load('testrun4.mat');
+%load('P_I_regdepth_PR.mat');
+load('testrun4.mat');
 %load('plattform3_hivroll.mat');
 
 %% Filter fusion gyro and accelerometer
@@ -94,12 +94,17 @@ for i=1:dataset_length
    roll_k_1 = roll_k;
    
    if (delta_pitch_k > 1)
-       weight_acc_pitch(i) = abs(weight_acc(i)/(delta_pitch_k));
+       weight_acc_pitch(i) = weight_acc(i)/delta_pitch_k;
+   elseif (delta_pitch_k < -1)
+       weight_acc_pitch(i) = - weight_acc(i)/delta_pitch_k;
    else
        weight_acc_pitch(i) = weight_acc(i);
    end
+   
    if (delta_roll_k > 1)
-       weight_acc_roll(i) = abs(weight_acc(i)/(delta_roll_k));
+       weight_acc_roll(i) = weight_acc(i)/delta_roll_k;
+   elseif (delta_roll_k < -1)
+       weight_acc_roll(i) = - weight_acc(i)/delta_roll_k;
    else
        weight_acc_roll(i) = weight_acc(i);
    end
@@ -108,7 +113,7 @@ for i=1:dataset_length
    % ----------------------------------------------------------------------
    % GYROSCOPE
    % ----------------------------------------------------------------------
-   % Convet to degrees per second
+   % Convert to degrees per second
 %    gx_k = gx(i)*1000/(2^15-1);
 %    gy_k = gy(i)*1000/(2^15-1);
 %    gz_k = gz(i)*1000/(2^15-1);
@@ -172,27 +177,28 @@ time = 0:timestep:(timestep*dataset_length - timestep);
 % Sine wave for Stewart platform test
 % sine_wave = 20*sin(0.25*2*pi*time-10.4);
 
- subplot(3,1,1);
-% plot(time, pitch_acc_plot);hold on; plot(time, pitch_fus_plot,'LineWidth', 1);
-% legend('Akselerometer stamp' ,'Filtrert stamp');
-% xlabel('Tid [s]'); ylabel('Vinkel [grader]');
+ subplot(2,1,1);
+plot(time, pitch_acc_plot);hold on; plot(time, pitch_fus_plot,'LineWidth', 1);
+legend('Akselerometer stamp' ,'Filtrert stamp');
+xlabel('Tid [s]'); ylabel('Vinkel [grader]');
 %axis([45 55 -6 6]);
 
-plot(time, pitch./10, 'LineWidth', 1);
-legend('Stamp');
-xlabel('Tid [s]'); ylabel('Vinkel [grader]');
-axis([0 120 -5 5]);
+% plot(time, pitch./10, 'LineWidth', 1);
+% legend('Stamp');
+% xlabel('Tid [s]'); ylabel('Vinkel [grader]');
+% axis([0 120 -5 5]);
 
-subplot(3,1,2);
-plot(time, roll./10, 'LineWidth', 1);
-legend('Rull');
-xlabel('Tid [s]'); ylabel('Vinkel [grader]');
-axis([0 120 -5 5]);
+subplot(2,1,2);
+
+% plot(time, roll./10, 'LineWidth', 1);
+% legend('Rull');
+% xlabel('Tid [s]'); ylabel('Vinkel [grader]');
+% axis([0 120 -5 5]);
 
 % % Roll
-% plot(time, roll_acc_plot); hold on; plot(time, roll_fus_plot, 'LineWidth', 1);
-% legend('Akselerometer rull' ,'Filtrert rull');
-% xlabel('Tid [x100 ms]'); ylabel('Vinkel [grader]');
+plot(time, roll_acc_plot); hold on; plot(time, roll_fus_plot, 'LineWidth', 1);
+legend('Akselerometer rull' ,'Filtrert rull');
+xlabel('Tid [x100 ms]'); ylabel('Vinkel [grader]');
 % axis([20 50 -30 10]);
 
 % Weights
@@ -200,19 +206,19 @@ axis([0 120 -5 5]);
 % legend('Vekt akselerometer', 'Vekt gyroskop'); xlabel('Tid [x100 ms]');
 %axis([30 40 -0.2 1.2]);
 
-subplot(3,1,3);
+% subplot(3,1,3);
 
 % plot(time, depth./1000, 'LineWidth', 1);
 % legend('Dybde');
 % xlabel('Tid [s]'); ylabel('Dybde [m]');
 
 % Thrusters
-th_abs = sqrt(th1.^2 + th2.^2 + th3.^2 + th4.^2 + th5.^2 + th6.^2 ...
-    + th7.^2 + th8.^2);
-th_abs = th_abs./200;
-plot(time, th_abs, 'LineWidth', 1.5);
-legend('Absolutt thrusterpådrag');
-xlabel('Tid [s]');
+% th_abs = sqrt(th1.^2 + th2.^2 + th3.^2 + th4.^2 + th5.^2 + th6.^2 ...
+%     + th7.^2 + th8.^2);
+% th_abs = th_abs./200;
+% plot(time, th_abs, 'LineWidth', 1.5);
+% legend('Absolutt thrusterpådrag');
+% xlabel('Tid [s]');
 %axis([45 55 0.23 0.27]);
 
 
